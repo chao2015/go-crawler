@@ -13,10 +13,3 @@ type ParseResult struct {
 func NilParser([]byte) ParseResult {
 	return ParseResult{}
 }
-
-type Item struct {
-	Url     string
-	Type    string
-	Id      string
-	Payload interface{}
-}
