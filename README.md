@@ -5,6 +5,8 @@ A distributed crawler based on Golang.
 
 Details:
 
+[https://blog.csdn.net/chao2016/article/details/81697353](https://blog.csdn.net/chao2016/article/details/81697353)
+
 
 Tree:
 
