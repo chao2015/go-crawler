@@ -8,6 +8,7 @@ import (
 const cityListRe = `<a href="(http://www.zhenai.com/zhenghun/[0-9a-z]+)"[^>]*>([^<]+)</a>`
 
 // 城市列表解析器
+// 得到各个城市名称和城市首页url
 // input: utf-8编码的文本
 // output: Request{URL, 对应Parser}列表，Item列表。见type ParseResult struct{}
 func ParseCityList(contents []byte) engine.ParseResult {
@@ -15,7 +16,8 @@ func ParseCityList(contents []byte) engine.ParseResult {
 	matches := re.FindAllSubmatch(contents, -1)
 
 	result := engine.ParseResult{}
-	limit := 10
+	// 限制只读城市列表中的10个
+	//limit := 10
 	for _, m := range matches {
 		result.Items = append(result.Items, "City "+string(m[2]))
 		result.Requests = append(
@@ -24,10 +26,10 @@ func ParseCityList(contents []byte) engine.ParseResult {
 				Url:        string(m[1]),
 				ParserFunc: ParseCity,
 			})
-		limit--
-		if limit == 0 {
-			break
-		}
+		//limit--
+		//if limit == 0 {
+		//	break
+		//}
 	}
 	return result
 }

@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"net/http"
+	"time"
 
 	"golang.org/x/net/html/charset"
 	"golang.org/x/text/encoding"
@@ -13,11 +14,16 @@ import (
 	"golang.org/x/text/transform"
 )
 
+var rateLimiter = time.Tick(10 * time.Millisecond)
+
 // 获取网页信息
 // input: url
 // output:
 func Fetch(url string) ([]byte, error) {
+	// 流量限制：执行到这里，需要隔10毫秒才继续往下执行
+	<-rateLimiter
 	//resp, err := http.Get(url)
+
 	// 直接用http.Get(url)进行获取信息会报错：Error: status code 403
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
@@ -31,7 +37,6 @@ func Fetch(url string) ([]byte, error) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {

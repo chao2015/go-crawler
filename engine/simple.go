@@ -5,8 +5,10 @@ import (
 	"log"
 )
 
+type SimpleEngine struct{}
+
 // input: Request
-func Run(seeds ...Request) {
+func (e SimpleEngine) Run(seeds ...Request) {
 	var requests []Request
 	for _, r := range seeds {
 		requests = append(requests, r)
@@ -16,19 +18,27 @@ func Run(seeds ...Request) {
 		r := requests[0]
 		requests = requests[1:]
 
-		log.Printf("Fetching %s", r.Url)
-		body, err := fetcher.Fetch(r.Url)
+		parserResult, err := e.worker(r)
 		if err != nil {
-			log.Printf("Fetcher: error "+"fetching url %s: %v",
-				r.Url, err)
 			continue
 		}
-
-		parserResult := r.ParserFunc(body)
 		requests = append(requests, parserResult.Requests...) // ...就是把slice的内容展开加进去
 
 		for _, item := range parserResult.Items {
 			log.Printf("Got item %v", item)
 		}
 	}
+}
+
+// 从Run中分离出worker，为了让多个worker并发执行
+func (SimpleEngine) worker(r Request) (ParseResult, error) {
+	log.Printf("Fetching %s", r.Url)
+	body, err := fetcher.Fetch(r.Url)
+	if err != nil {
+		log.Printf("Fetcher: error "+"fetching url %s: %v",
+			r.Url, err)
+		return ParseResult{}, err
+	}
+
+	return r.ParserFunc(body), nil
 }

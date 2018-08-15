@@ -8,7 +8,7 @@ import (
 const cityRe = `<a href="(http://album.zhenai.com/u/[0-9]+)"[^>]*>([^<]+)</a>`
 
 // 城市解析器
-// 获得每个城市中首页的用户名字
+// 得到各个城市首页上的用户名称和用户详情页url
 func ParseCity(contents []byte) engine.ParseResult {
 	re := regexp.MustCompile(cityRe)
 	matches := re.FindAllSubmatch(contents, -1)
