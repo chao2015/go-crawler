@@ -1,29 +1,25 @@
-package parser
+package view
 
 import (
 	"crawler/engine"
-	"crawler/model"
-	"io/ioutil"
+	"crawler/frontend/model"
+	common "crawler/model"
+	"html/template"
+	"os"
 	"testing"
 )
 
-func TestParseProfile(t *testing.T) {
-	contents, err := ioutil.ReadFile("profile_test_data.html")
-	if err != nil {
-		panic(err)
-	}
+func TestTemplate(t *testing.T) {
+	template := template.Must(template.ParseFiles("template.html"))
 
-	result := ParseProfile(contents, "http://album.zhenai.com/u/1552811555", "芜湖小啊妹")
-	if len(result.Items) != 1 {
-		t.Errorf("Items should contain 1 "+"element; but was %v", result.Items)
-	}
-
-	actual := result.Items[0]
-	expected := engine.Item{
+	out, err := os.Create("template.test.html")
+	page := model.SearchResult{}
+	page.Hits = 123
+	item := engine.Item{
 		Url:  "http://album.zhenai.com/u/1552811555",
 		Type: "zhenai",
 		Id:   "1552811555",
-		Payload: model.Profile{
+		Payload: common.Profile{
 			Name:          "芜湖小啊妹",
 			Gender:        "女",
 			Age:           30,
@@ -39,8 +35,13 @@ func TestParseProfile(t *testing.T) {
 			Car:           "未购车",
 		},
 	}
+	for i := 0; i < 10; i++ {
+		page.Items = append(page.Items, item)
+	}
 
-	if actual != expected {
-		t.Errorf("expected %v; but was %v", expected, actual)
+	//err = template.Execute(os.Stdout, page)
+	err = template.Execute(out, page)
+	if err != nil {
+		panic(err)
 	}
 }

@@ -1,29 +1,31 @@
-package parser
+package view
 
 import (
-	"crawler/engine"
-	"crawler/model"
-	"io/ioutil"
+	"os"
 	"testing"
+
+	"crawler/engine"
+	"crawler/frontend/model"
+	common "crawler/model"
 )
 
-func TestParseProfile(t *testing.T) {
-	contents, err := ioutil.ReadFile("profile_test_data.html")
+func TestSearchResultView_Render(t *testing.T) {
+	view := CreateSearchResultView(
+		"template.html")
+
+	out, err := os.Create("template.test.html")
 	if err != nil {
 		panic(err)
 	}
+	defer out.Close()
 
-	result := ParseProfile(contents, "http://album.zhenai.com/u/1552811555", "芜湖小啊妹")
-	if len(result.Items) != 1 {
-		t.Errorf("Items should contain 1 "+"element; but was %v", result.Items)
-	}
-
-	actual := result.Items[0]
-	expected := engine.Item{
+	page := model.SearchResult{}
+	page.Hits = 123
+	item := engine.Item{
 		Url:  "http://album.zhenai.com/u/1552811555",
 		Type: "zhenai",
 		Id:   "1552811555",
-		Payload: model.Profile{
+		Payload: common.Profile{
 			Name:          "芜湖小啊妹",
 			Gender:        "女",
 			Age:           30,
@@ -39,8 +41,14 @@ func TestParseProfile(t *testing.T) {
 			Car:           "未购车",
 		},
 	}
-
-	if actual != expected {
-		t.Errorf("expected %v; but was %v", expected, actual)
+	for i := 0; i < 10; i++ {
+		page.Items = append(page.Items, item)
 	}
+
+	err = view.Render(out, page)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// TODO: verify contents in template.test.html
 }
